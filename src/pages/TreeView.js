@@ -1,12 +1,13 @@
 import parseSirius from "../utils/ftReader";
 import TreeChart from "../components/TreeChart";
-import {useRef, useState} from "react";
+import {useRef, useState, useMemo} from "react";
 import {FolderOpenIcon} from "@heroicons/react/24/outline";
 import {XMarkIcon} from "@heroicons/react/24/outline";
+import TypingBox from "../components/TypingBox";
 
 function TreeView() {
     const [jsonData, setJsonData] = useState(null);
-    const tree = parseSirius(jsonData);
+    const tree = useMemo(() => parseSirius(jsonData), [jsonData]);
     const fileInput = useRef(null);
 
     function handleFileChange(event) {
@@ -16,7 +17,7 @@ function TreeView() {
         reader.onload = function (e) {
             const contents = e.target.result;
             const parsedJson = JSON.parse(contents);
-            setJsonData(parsedJson);
+            setJsonData(data => parsedJson);
         };
 
         reader.readAsText(file);
@@ -34,23 +35,25 @@ function TreeView() {
 
     return (
         <div className="container mx-auto mt-8 ">
-            <h1 className={"font-semibold font-sans text-xl mb-8"}>Sirius Fragmentation Visualization</h1>
+            <h1 className={"font-semibold font-sans text-xl mb-8 text-blue-500"}>Sirius Fragmentation Visualization</h1>
             <div className={"flex flex-row-reverse"}>
                 <div className={"flex flex-col gap-2"}>
                 <input type="file" ref={fileInput} onChange={handleFileChange}
                        className="hidden"/>
                 <button type="button" onClick={handleUpload}>
-                    <FolderOpenIcon className={"h-8 w-8 hover:text-green-400"}/>
+                    <FolderOpenIcon className={"h-8 w-8 hover:text-green-400 text-indigo-500"}/>
                 </button>
-                {tree &&
+                {tree.status !== "empty" &&
                     <button onClick={handleClear}>
-                        <XMarkIcon className={"h-8 w-8 hover:text-red-500"}/>
+                        <XMarkIcon className={"h-8 w-8 hover:text-red-500 text-indigo-500"}/>
                     </button>}
             </div>
             </div>
 
-            {tree && <div className={"m-8"}><TreeChart data={tree}/></div>}
-
+            {tree.status === "success"
+                && <div className={"m-8 bg-white rounded-lg shadow-md"}><TreeChart data={tree.tree}/></div>}
+            {tree.status === "error"
+                && <div className={"m-8"}><TypingBox message={tree.error}/></div>}
         </div>
     )
 }

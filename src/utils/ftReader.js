@@ -8,15 +8,19 @@ class FT {
         return this._sirius.fragments[index].molecularFormula;
     }
 
+    value(index) {
+        return {mz: this._sirius.fragments[index].mz, ion: this._sirius.fragments[index].ion};
+    }
+
     getSubTree(index) {
-        return this._trees.get(index) || {"name": this.formular(index)};
+        return this._trees.get(index) || {name: this.formular(index), value: this.value(index)};
     }
 
     editSubTree(index, subTree) {
         if (this._trees.has(index)) {
             this._trees.get(index).children.push(subTree);
         } else {
-            this._trees.set(index, {"name": this.formular(index), "children": [subTree]});
+            this._trees.set(index, {name: this.formular(index), children: [subTree], value: this.value(index)});
         }
     }
 
@@ -38,10 +42,14 @@ class FT {
 
 function parseSirius(sirius) {
     if (!sirius) {
-        return null;
+        return {status: "empty"};
     }
     const ft = new FT(sirius);
-    return ft.getTree();
+    try {
+        return {status: "success", tree: ft.getTree()};
+    } catch (e) {
+        return {status: "error", error: "Not a valid Sirius fragmentation tree JSON file!"};
+    }
 }
 
 export default parseSirius;

@@ -4,7 +4,12 @@ const TreeChart = ({data}) => {
     const option = {
         tooltip: {
             trigger: 'item',
-            triggerOn: 'mousemove'
+            triggerOn: 'mousemove',
+            formatter: (params) => {
+                const mz = params.value.mz.toFixed(4);
+                const ion = params.value.ion;
+                return `m/z: ${mz}<br/>ion: ${ion}`;
+            },
         },
         series: [
             {
@@ -19,7 +24,7 @@ const TreeChart = ({data}) => {
                     position: 'left',
                     verticalAlign: 'middle',
                     align: 'right',
-                    fontSize: 9
+                    fontSize: 12,
                 },
                 leaves: {
                     label: {
